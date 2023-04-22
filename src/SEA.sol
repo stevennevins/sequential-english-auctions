@@ -2,19 +2,31 @@
 pragma solidity ^0.8.17;
 
 import {MaxOrderedHeap} from "src/lib/MaxOrderedHeap.sol";
+import {toDaysWadUnsafe} from "solmate/utils/SignedWadMath.sol";
 
 abstract contract SEA {
     using MaxOrderedHeap for MaxOrderedHeap.HeapArray;
 
     uint256 public immutable reservePrice;
     uint256 public immutable minBidIncrease;
-    uint256 public immutable maxSortedBidders = 1_000;
+    uint256 public immutable startTime = block.timestamp;
+    uint256 public immutable maxSortedBidders = 10_000;
 
+    uint256 public totalSold;
     MaxOrderedHeap.HeapArray internal heap;
 
     constructor(uint256 _reservePrice, uint256 _minBidIncrease) {
         reservePrice = _reservePrice;
         minBidIncrease = _minBidIncrease;
+    }
+
+    function _getFillableQuantity() internal view returns (uint256 fillable) {
+        int256 timeSinceStart = toDaysWadUnsafe(block.timestamp - startTime);
+        while (
+            getTargetSaleTime(int256(totalSold + fillable)) < timeSinceStart
+        ) {
+            fillable++;
+        }
     }
 
     function _enterHeap(
