@@ -9,10 +9,10 @@ abstract contract SEA {
 
     uint256 public immutable reservePrice;
     uint256 public immutable minBidIncrease;
-    uint256 public immutable startTime = block.timestamp;
     uint256 public immutable maxSortedBidders = 10_000;
 
     uint256 public totalSold;
+    uint256 public startTime = block.timestamp;
     MaxOrderedHeap.HeapArray internal heap;
 
     constructor(uint256 _reservePrice, uint256 _minBidIncrease) {
