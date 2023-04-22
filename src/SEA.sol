@@ -20,14 +20,9 @@ abstract contract SEA {
         minBidIncrease = _minBidIncrease;
     }
 
-    function _getFillableQuantity() internal view returns (uint256 fillable) {
-        int256 timeSinceStart = toDaysWadUnsafe(block.timestamp - startTime);
-        while (getTargetSaleTime(int256(totalSold + fillable)) < timeSinceStart) {
-            fillable++;
-        }
-    }
+    function getTargetSaleTime(int256 sold) public view virtual returns (int256);
 
-    function _enterHeap(address who, uint8 amount, uint96 price) internal {
+    function _enterHeap(address who, uint8 /* amount */, uint96 price) internal {
         uint256 index = heap.indexOf[who];
         MaxOrderedHeap.Account memory account = heap.accounts[index];
         uint96 oldValue = account.value;
@@ -41,5 +36,10 @@ abstract contract SEA {
         heap.update(who, oldValue, 0, maxSortedBidders);
     }
 
-    function getTargetSaleTime(int256 sold) public view virtual returns (int256);
+    function _getFillableQuantity() internal view returns (uint256 fillable) {
+        int256 timeSinceStart = toDaysWadUnsafe(block.timestamp - startTime);
+        while (getTargetSaleTime(int256(totalSold + fillable)) < timeSinceStart) {
+            fillable++;
+        }
+    }
 }
