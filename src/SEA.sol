@@ -22,24 +22,26 @@ abstract contract SEA {
 
     function getTargetSaleTime(int256 sold) public view virtual returns (int256);
 
-    function _enterHeap(address who, uint8 /* amount */, uint96 price) internal {
+    function _enterHeap(address who, uint8 amount, uint88 price) internal {
         uint256 index = heap.indexOf[who];
         MaxOrderedHeap.Account memory account = heap.accounts[index];
-        uint96 oldValue = account.value;
-        heap.update(who, oldValue, price, maxSortedBidders);
+        uint88 oldValue = account.value;
+        uint8 oldAmount = account.amount;
+        heap.update(who, oldValue, oldAmount, price, amount, maxSortedBidders);
     }
 
     function _leaveHeap(address who) internal {
         uint256 index = heap.indexOf[who];
         MaxOrderedHeap.Account memory account = heap.accounts[index];
-        uint96 oldValue = account.value;
-        heap.update(who, oldValue, 0, maxSortedBidders);
+        uint88 oldValue = account.value;
+        uint8 oldAmount = account.amount;
+        heap.update(who, oldValue, oldAmount, 0, 0, maxSortedBidders);
     }
 
-    function _getFillableQuantity() internal view returns (uint256 fillable) {
+    function _getFillableQuantity() internal view returns (uint256 quantity) {
         int256 timeSinceStart = toDaysWadUnsafe(block.timestamp - startTime);
-        while (getTargetSaleTime(int256(totalSold + fillable)) < timeSinceStart) {
-            fillable++;
+        while (getTargetSaleTime(int256(totalSold + quantity)) < timeSinceStart) {
+            quantity++;
         }
     }
 }

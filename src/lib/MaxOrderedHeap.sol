@@ -7,7 +7,8 @@ import {SafeCastLib} from "solmate/utils/SafeCastLib.sol";
 library MaxOrderedHeap {
     struct Account {
         address id; // The address of the account.
-        uint96 value; // The value of the account.
+        uint8 amount; // The amount to bid on.
+        uint88 value; // The unitPrice of the bid.
     }
 
     struct HeapArray {
@@ -37,12 +38,14 @@ library MaxOrderedHeap {
     function update(
         HeapArray storage _heap,
         address _id,
-        uint256 _formerValue,
-        uint256 _newValue,
+        uint88 _formerValue,
+        uint8 _formerAmount,
+        uint88 _newValue,
+        uint8 _newAmount,
         uint256 _maxSortedUsers
     ) internal {
-        uint96 formerValue = SafeCastLib.safeCastTo96(_formerValue);
-        uint96 newValue = SafeCastLib.safeCastTo96(_newValue);
+        uint88 formerValue = SafeCastLib.safeCastTo88(_formerValue);
+        uint88 newValue = SafeCastLib.safeCastTo88(_newValue);
 
         uint256 size = _heap.size;
         uint256 newSize = computeSize(size, _maxSortedUsers);
@@ -50,7 +53,8 @@ library MaxOrderedHeap {
 
         if (formerValue != newValue) {
             if (newValue == 0) remove(_heap, newSize, _id, formerValue);
-            else if (formerValue == 0) insert(_heap, newSize, _id, newValue, _maxSortedUsers);
+            else if (formerValue == 0)
+                insert(_heap, newSize, _id, _newAmount, newValue, _maxSortedUsers);
             else if (formerValue < newValue)
                 increase(_heap, newSize, _id, newValue, _maxSortedUsers);
             else decrease(_heap, newSize, _id, newValue);
@@ -163,7 +167,8 @@ library MaxOrderedHeap {
         HeapArray storage _heap,
         uint256 _size,
         address _id,
-        uint96 _value,
+        uint8 _amount,
+        uint88 _value,
         uint256 _maxSortedUsers
     ) private {
         // `_heap` cannot contain the 0 address.
@@ -171,7 +176,7 @@ library MaxOrderedHeap {
 
         // Put the account at the end of accounts.
         uint256 accountsLength = _heap.accounts.length;
-        _heap.accounts.push(Account(_id, _value));
+        _heap.accounts.push(Account(_id, _amount, _value));
         _heap.indexOf[_id] = accountsLength;
 
         // Move the account at the end of the heap and restore the invariant.
@@ -190,7 +195,7 @@ library MaxOrderedHeap {
         HeapArray storage _heap,
         uint256 _size,
         address _id,
-        uint96 _newValue
+        uint88 _newValue
     ) private {
         uint256 index = _heap.indexOf[_id];
         _heap.accounts[index].value = _newValue;
@@ -210,7 +215,7 @@ library MaxOrderedHeap {
         HeapArray storage _heap,
         uint256 _size,
         address _id,
-        uint96 _newValue,
+        uint88 _newValue,
         uint256 _maxSortedUsers
     ) private {
         uint256 index = _heap.indexOf[_id];
@@ -234,7 +239,7 @@ library MaxOrderedHeap {
         HeapArray storage _heap,
         uint256 _size,
         address _id,
-        uint96 _removedValue
+        uint88 _removedValue
     ) private {
         uint256 index = _heap.indexOf[_id];
         uint256 accountsLength = _heap.accounts.length;
