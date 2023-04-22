@@ -15,13 +15,7 @@ abstract contract LinearSEA is SEA {
         perTimeUnit = _perTimeUnit;
     }
 
-    function getTargetSaleTime(int256 sold)
-        public
-        view
-        virtual
-        override
-        returns (int256)
-    {
+    function getTargetSaleTime(int256 sold) public view virtual override returns (int256) {
         return unsafeWadDiv(sold, perTimeUnit);
     }
 }

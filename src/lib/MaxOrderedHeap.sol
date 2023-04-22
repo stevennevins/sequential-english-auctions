@@ -50,8 +50,7 @@ library MaxOrderedHeap {
 
         if (formerValue != newValue) {
             if (newValue == 0) remove(_heap, newSize, _id, formerValue);
-            else if (formerValue == 0)
-                insert(_heap, newSize, _id, newValue, _maxSortedUsers);
+            else if (formerValue == 0) insert(_heap, newSize, _id, newValue, _maxSortedUsers);
             else if (formerValue < newValue)
                 increase(_heap, newSize, _id, newValue, _maxSortedUsers);
             else decrease(_heap, newSize, _id, newValue);
@@ -65,11 +64,7 @@ library MaxOrderedHeap {
     /// @param _size The old size of the heap.
     /// @param _maxSortedUsers The maximum size of the heap.
     /// @return The new size computed.
-    function computeSize(uint256 _size, uint256 _maxSortedUsers)
-        private
-        pure
-        returns (uint256)
-    {
+    function computeSize(uint256 _size, uint256 _maxSortedUsers) private pure returns (uint256) {
         while (_size >= _maxSortedUsers) _size >>= 1;
         return _size;
     }
@@ -80,11 +75,7 @@ library MaxOrderedHeap {
     /// @param _heap The heap to modify.
     /// @param _index The index of the account in the heap to be set.
     /// @param _account The account to set the `_index` to.
-    function setAccount(
-        HeapArray storage _heap,
-        uint256 _index,
-        Account memory _account
-    ) private {
+    function setAccount(HeapArray storage _heap, uint256 _index, Account memory _account) private {
         _heap.accounts[_index] = _account;
         _heap.indexOf[_account.id] = _index;
     }
@@ -95,11 +86,7 @@ library MaxOrderedHeap {
     /// @param _heap The heap to modify.
     /// @param _index1 The index of the first account in the heap.
     /// @param _index2 The index of the second account in the heap.
-    function swap(
-        HeapArray storage _heap,
-        uint256 _index1,
-        uint256 _index2
-    ) private {
+    function swap(HeapArray storage _heap, uint256 _index1, uint256 _index2) private {
         if (_index1 == _index2) return;
         Account memory accountOldIndex1 = _heap.accounts[_index1];
         Account memory accountOldIndex2 = _heap.accounts[_index2];
@@ -119,8 +106,7 @@ library MaxOrderedHeap {
             // _index is checked to be greater than 0 before subtracting 1
             while (
                 _index > ROOT &&
-                valueToShift >
-                (parentAccount = _heap.accounts[(_index - 1) >> 1]).value
+                valueToShift > (parentAccount = _heap.accounts[(_index - 1) >> 1]).value
             ) {
                 setAccount(_heap, _index, parentAccount);
                 _index = (_index - 1) >> 1;
@@ -134,11 +120,7 @@ library MaxOrderedHeap {
     /// @param _heap The heap to modify.
     /// @param _size The computed size of the heap.
     /// @param _index The index of the account to move.
-    function shiftDown(
-        HeapArray storage _heap,
-        uint256 _size,
-        uint256 _index
-    ) private {
+    function shiftDown(HeapArray storage _heap, uint256 _size, uint256 _index) private {
         Account memory accountToShift = _heap.accounts[_index];
         uint256 valueToShift = accountToShift.value;
         uint256 childIndex = (_index << 1) + 1;
@@ -265,8 +247,7 @@ library MaxOrderedHeap {
 
         // If the swapped account is in the heap, restore the invariant: its value can be smaller or larger than the removed value.
         if (index < _size) {
-            if (_removedValue > _heap.accounts[index].value)
-                shiftDown(_heap, _size, index);
+            if (_removedValue > _heap.accounts[index].value) shiftDown(_heap, _size, index);
             else shiftUp(_heap, index);
         }
     }
@@ -284,11 +265,7 @@ library MaxOrderedHeap {
     /// @param _heap The heap to search in.
     /// @param _id The address of the account.
     /// @return The value of the account.
-    function getValueOf(HeapArray storage _heap, address _id)
-        internal
-        view
-        returns (uint256)
-    {
+    function getValueOf(HeapArray storage _heap, address _id) internal view returns (uint256) {
         uint256 index = _heap.indexOf[_id];
         if (index >= _heap.accounts.length) return 0;
         Account memory account = _heap.accounts[index];
@@ -318,11 +295,7 @@ library MaxOrderedHeap {
     /// @param _heap The heap to search in.
     /// @param _id The address of the account.
     /// @return The address of the previous account.
-    function getPrev(HeapArray storage _heap, address _id)
-        internal
-        view
-        returns (address)
-    {
+    function getPrev(HeapArray storage _heap, address _id) internal view returns (address) {
         uint256 index = _heap.indexOf[_id];
         if (index > ROOT) return _heap.accounts[index - 1].id;
         else return address(0);
@@ -333,16 +306,10 @@ library MaxOrderedHeap {
     /// @param _heap The heap to search in.
     /// @param _id The address of the account.
     /// @return The address of the next account.
-    function getNext(HeapArray storage _heap, address _id)
-        internal
-        view
-        returns (address)
-    {
+    function getNext(HeapArray storage _heap, address _id) internal view returns (address) {
         uint256 index = _heap.indexOf[_id];
-        if (
-            index + 1 >= _heap.accounts.length ||
-            _heap.accounts[index].id != _id
-        ) return address(0);
+        if (index + 1 >= _heap.accounts.length || _heap.accounts[index].id != _id)
+            return address(0);
         else return _heap.accounts[index + 1].id;
     }
 }
